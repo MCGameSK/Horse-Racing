@@ -5,3 +5,8 @@
 ---
 ![gif](https://user-images.githubusercontent.com/31058262/146720762-937870d2-e0ac-4278-9f82-1695cd588438.gif)
 ---
+/hr  Open racing menu   
+/hrsetbase  Set currency to command sender's tool   
+/hrsetmid  Set middle of range   
+/hrsetmax  Set max of range  
+/hrsetmin  Set min of range
