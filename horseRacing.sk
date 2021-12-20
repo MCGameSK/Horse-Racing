@@ -1,0 +1,427 @@
+#
+#Github https://github.com/MCGameSK/Horse-Racing
+#
+
+
+
+options:
+    Waiting: 15
+
+
+
+on load:
+    #Main UI
+    delete {racingmenu::slot::*}
+
+    set {racingmenu::slot::45} to gray stained glass pane named "&8"
+    set {racingmenu::slot::46} to gray stained glass pane named "&8"
+    set {racingmenu::slot::47} to gray stained glass pane named "&8"
+    set {racingmenu::slot::48} to gray stained glass pane named "&8"
+    set {racingmenu::slot::50} to gray stained glass pane named "&8"
+    set {racingmenu::slot::51} to gray stained glass pane named "&8"
+    set {racingmenu::slot::52} to gray stained glass pane named "&8"
+    set {racingmenu::slot::53} to gray stained glass pane named "&8"
+    loop 9 times:
+        set {racingmenu::slot::%8 + loop-number%} to oak fence named "&8"
+        set {racingmenu::slot::%26 + loop-number%} to oak fence named "&8"
+
+
+
+    #Initializing
+    loop offlineplayers:
+        delete {horsechoose::%loop-offlineplayers's uuid%}
+    set {betcount1} to 0
+    set {betcount2} to 0
+    set {betcount3} to 0
+    if {newbetting} is not set:
+        set {newbetting} to 2
+    if {newrangemin} is not set:
+        set {newrangemin} to -1
+    if {newrangemax} is not set:
+        set {newrangemax} to 8
+    set {racingmenu::betting} to {newbetting} + (random integer between {newrangemin} and {newrangemax})
+    set {racingmenu::horse1} to leather horse armor named "Horse no.1"
+    set {racingmenu::horse2} to leather horse armor named "Horse no.2"
+    set {racingmenu::horse3} to leather horse armor named "Horse no.3"
+    set {racingmenu::start} to false
+    set {racingmenu::ready} to false
+    set {racingmenu::horsepos1} to 0
+    set {racingmenu::horsepos2} to 18
+    set {racingmenu::horsepos3} to 36
+    set {racingmenu::slot::0} to {racingmenu::horse1}
+    set {racingmenu::slot::18} to {racingmenu::horse2}
+    set {racingmenu::slot::36} to {racingmenu::horse3}
+    if name of {betbase} is not set:
+        set {racingmenu::slot::49} to iron horse armor named "&aBet to start" with lore "&7&oBetting amount: %type of {betbase}% &7&ox %{racingmenu::betting}%"
+    else:
+        set {racingmenu::slot::49} to iron horse armor named "&aBet to start" with lore "&7&oBetting amount: %name of {betbase}% &7&ox %{racingmenu::betting}%"
+
+    set {racingmenu::inventory} to chest inventory with 6 rows named "Horse-Racing"
+	
+    loop {racingmenu::slot::*}:
+        set {_slot} to loop-index parsed as integer
+        set slot {_slot} of {racingmenu::inventory} to loop-value
+
+
+
+# Horse Pos Apply
+function ApplyHorsePos():
+    loop 9 times:
+        set {_slot} to loop-number
+        set slot {_slot} - 1 of {racingmenu::inventory} to air
+        set slot {_slot} + 17 of {racingmenu::inventory} to air
+        set slot {_slot} + 35 of {racingmenu::inventory} to air
+
+    set slot {racingmenu::horsepos1} of {racingmenu::inventory} to {racingmenu::horse1}
+    set slot {racingmenu::horsepos2} of {racingmenu::inventory} to {racingmenu::horse2}
+    set slot {racingmenu::horsepos3} of {racingmenu::inventory} to {racingmenu::horse3}
+
+    if {racingmenu::start} is true:
+        if name of {betbase} is not set:
+            set {racingmenu::slot::49} to iron horse armor named "&cThe game is underway" with lore "&7&oReward: %type of {betbase}% &7&ox %{racingmenu::bettotal}%"
+        else:
+            set {racingmenu::slot::49} to iron horse armor named "&cThe game is underway" with lore "&7&oReward: %name of {betbase}% &7&ox %{racingmenu::bettotal}%"
+    else:
+        if {racingmenu::ready} is true:
+            if name of {betbase} is not set:
+                set {racingmenu::slot::49} to iron horse armor named "&eRecruiting! %{racingmenu::countdown}%s" with lore "&7&oBetting amount: %type of {betbase}% &7&ox %{racingmenu::betting}%"
+            else:
+                set {racingmenu::slot::49} to iron horse armor named "&eRecruiting! %{racingmenu::countdown}%s" with lore "&7&oBetting amount: %name of {betbase}% &7&ox %{racingmenu::betting}%"
+        else:
+            if name of {betbase} is not set:
+                set {racingmenu::slot::49} to iron horse armor named "&aBet to start" with lore "&7&oBetting amount: %type of {betbase}% &7&ox %{racingmenu::betting}%"
+            else:
+                set {racingmenu::slot::49} to iron horse armor named "&aBet to start" with lore "&7&oBetting amount: %name of {betbase}% &7&ox %{racingmenu::betting}%"
+
+    set slot 49 of {racingmenu::inventory} to {racingmenu::slot::49}
+
+
+
+# Horse Pos Reset
+function ResetHorsePos():
+    set {racingmenu::horsepos1} to 0
+    set {racingmenu::horsepos2} to 18
+    set {racingmenu::horsepos3} to 36
+
+    loop 9 times:
+        set {_slot} to loop-number
+        set slot {_slot} - 1 of {racingmenu::inventory} to air
+        set slot {_slot} + 17 of {racingmenu::inventory} to air
+        set slot {_slot} + 35 of {racingmenu::inventory} to air
+
+    set slot {racingmenu::horsepos1} of {racingmenu::inventory} to {racingmenu::horse1}
+    set slot {racingmenu::horsepos2} of {racingmenu::inventory} to {racingmenu::horse2}
+    set slot {racingmenu::horsepos3} of {racingmenu::inventory} to {racingmenu::horse3}
+
+    set {racingmenu::countdown} to {racingmenu::waiting}
+
+    loop offlineplayers:
+        delete {horsechoose::%loop-offlineplayers's uuid%}
+
+    set {racingmenu::betcount1} to 0
+    set {racingmenu::betcount2} to 0
+    set {racingmenu::betcount3} to 0
+    set {racingmenu::bettotal} to 0
+    set {racingmenu::betting} to {newbetting} + (random integer between {newrangemin} and {newrangemax})
+
+
+
+#Return bet money
+on quit:
+    if {racingmenu::ready} is true:
+        if {horsechoose::%player's uuid%} is 1 or 2 or 3:
+            delete {horsechoose::%player's uuid%}
+            if player has enough space for {racingmenu::betting} of {betbase}:
+                give player {racingmenu::betting} of {betbase}
+            else:
+                drop {racingmenu::betting} of {betbase} at player
+            remove {racingmenu::betting} from {racingmenu::bettotal}
+
+
+
+on inventory click:
+    if current inventory of player is {racingmenu::inventory}:
+        cancel event
+
+        if event-inventory is open inventory:
+
+            #Choose 1
+            if index of clicked slot is 0:
+                if {racingmenu::start} is false:
+                    if {horsechoose::%player's uuid%} is not set:
+                        if GetAmount(player, {betbase}) >= {racingmenu::betting}:
+
+                            if {racingmenu::ready} is false:
+                                broadcast "&6Horse-Racing begins. Bet!"
+                                message formatted "<run command:/hr>&e[ &e&nBetting&e ]" to all players
+                                play sound "block.note_block.chime" with volume 0.8 and pitch 1 for all players
+
+                            if {horsechoose::%player's uuid%} is not set:
+                                broadcast "&7&o%player% bets on 1"
+                                play sound "block.note_block.bell" with volume 0.8 and pitch 1 for all players
+
+                                play sound "block.chain.step" with volume 1.4 and pitch 1 for player
+                                remove {racingmenu::betting} of {betbase} from inventory of player
+                                if name of {betbase} is not set:
+                                    message "&c&oBetting [ %type of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                else:
+                                    message "&c&oBetting [ %name of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                add {racingmenu::betting} to {racingmenu::bettotal}
+
+                            set {racingmenu::ready} to true
+                            set {horsechoose::%player's uuid%} to 1
+                            play sound "entity.horse.angry" with volume 1 and pitch 1 for player
+                        
+                        else:
+                            if name of {betbase} is not set:
+                                message "&c&oThere is no &7&o%type of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+                            else:
+                                message "&c&oThere is no &7&o%name of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+
+            #Choose 2
+            else if index of clicked slot is 18:
+                if {racingmenu::start} is false:
+                    if {horsechoose::%player's uuid%} is not set:
+                        if GetAmount(player, {betbase}) >= {racingmenu::betting}:
+
+                            if {racingmenu::ready} is false:
+                                broadcast "&6Horse-Racing begins. Bet!"
+                                message formatted "<run command:/hr>&e[ &e&nBetting&e ]" to all players
+                                play sound "block.note_block.chime" with volume 0.8 and pitch 1 for all players
+
+                            if {horsechoose::%player's uuid%} is not set:
+                                broadcast "&7&o%player% bets on 2"
+                                play sound "block.note_block.bell" with volume 0.8 and pitch 1 for all players
+
+                                play sound "block.chain.step" with volume 1.4 and pitch 1 for player
+                                remove {racingmenu::betting} of {betbase} from inventory of player
+                                if name of {betbase} is not set:
+                                    message "&c&oBetting [ %type of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                else:
+                                    message "&c&oBetting [ %name of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                add {racingmenu::betting} to {racingmenu::bettotal}
+
+                            set {racingmenu::ready} to true
+                            set {horsechoose::%player's uuid%} to 2
+                            play sound "entity.horse.angry" with volume 1 and pitch 1 for player
+
+                        else:
+                            if name of {betbase} is not set:
+                                message "&c&oThere is no &7&o%type of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+                            else:
+                                message "&c&oThere is no &7&o%name of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+
+            #Choose 3
+            else if index of clicked slot is 36:
+                if {racingmenu::start} is false:
+                    if {horsechoose::%player's uuid%} is not set:
+                        if GetAmount(player, {betbase}) >= {racingmenu::betting}:
+
+                            if {racingmenu::ready} is false:
+                                broadcast "&6Horse-Racing begins. Bet!"
+                                message formatted "<run command:/hr>&e[ &e&nBetting&e ]" to all players
+                                play sound "block.note_block.chime" with volume 0.8 and pitch 1 for all players
+
+                            if {horsechoose::%player's uuid%} is not set:
+                                broadcast "&7&o%player% bets on 3"
+                                play sound "block.note_block.bell" with volume 0.8 and pitch 1 for all players
+
+                                play sound "block.chain.step" with volume 1.4 and pitch 1 for player
+                                remove {racingmenu::betting} of {betbase} from inventory of player
+                                if name of {betbase} is not set:
+                                    message "&c&oBetting [ %type of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                else:
+                                    message "&c&oBetting [ %name of {betbase}% &c&ox %{racingmenu::betting}% ]"
+                                add {racingmenu::betting} to {racingmenu::bettotal}
+
+                            set {racingmenu::ready} to true
+                            set {horsechoose::%player's uuid%} to 3
+                            play sound "entity.horse.angry" with volume 1 and pitch 1 for player
+
+                        else:
+                            if name of {betbase} is not set:
+                                message "&c&oThere is no &7&o%type of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+                            else:
+                                message "&c&oThere is no &7&o%name of {betbase}% &c&ox %{racingmenu::betting}% in the inventory"
+
+
+
+every 0.5 seconds:
+    if {racingmenu::start} is true:
+		
+        set {_move1} to random integer between 1 and 3
+        set {_move2} to random integer between 1 and 3
+        set {_move3} to random integer between 1 and 3
+        if {_move1} is 1:
+            add 1 to {racingmenu::horsepos1}
+        if {_move2} is 1:
+            add 1 to {racingmenu::horsepos2}
+        if {_move3} is 1:
+            add 1 to {racingmenu::horsepos3}
+	
+        if {racingmenu::horsepos1} > 7:
+            set {racingmenu::horsepos1} to 8
+            set {racingmenu::start} to false
+            set {racingmenu::ready} to false
+
+            loop all players:
+                if {horsechoose::%loop-player's uuid%} is 1:
+                    #Get reward
+                    message "&eYour horse has won! &6" to loop-player
+
+                    if loop-player has enough space for floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount1}) of {betbase}:
+                        give loop-player floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount1}) of {betbase}
+                    else:
+                        drop floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount1}) of {betbase} at loop-player
+
+                    play sound "entity.pillager.celebrate" with volume 1 and pitch 1 for loop-player
+                    play sound "block.chain.place" with volume 1.4 and pitch 1.1 for loop-player
+
+                else if {horsechoose::%loop-player's uuid%} is 2 or 3:
+                    message "&cYour horse has lost!" to loop-player
+                    play sound "entity.iron_golem.damage" with volume 1 and pitch 0.6 for loop-player
+
+            ResetHorsePos()
+			
+        if {racingmenu::horsepos2} > 25:
+            set {racingmenu::horsepos2} to 26
+            set {racingmenu::start} to false
+            set {racingmenu::ready} to false
+
+            loop all players:
+                if {horsechoose::%loop-player's uuid%} is 2:
+                    #Get reward
+                    message "&eYour horse has won! &6" to loop-player
+
+                    if loop-player has enough space for floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount2}) of {betbase}:
+                        give loop-player floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount2}) of {betbase}
+                    else:
+                        drop floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount2}) of {betbase} at loop-player
+
+                    play sound "entity.pillager.celebrate" with volume 1 and pitch 1 for loop-player
+                    play sound "block.chain.place" with volume 1.4 and pitch 1.1 for loop-player
+
+                else if {horsechoose::%loop-player's uuid%} is 1 or 3:
+                    message "&cYour horse has lost!" to loop-player
+                    play sound "entity.iron_golem.damage" with volume 1 and pitch 0.6 for loop-player
+
+            ResetHorsePos()
+
+        if {racingmenu::horsepos3} > 43:
+            set {racingmenu::horsepos3} to 44
+            set {racingmenu::start} to false
+            set {racingmenu::ready} to false
+
+            loop all players:
+                if {horsechoose::%loop-player's uuid%} is 3:
+                    #Get reward
+                    message "&eYour horse has won! &6" to loop-player
+
+                    if loop-player has enough space for floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount3}) of {betbase}:
+                        give loop-player floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount3}) of {betbase}
+                    else:
+                        drop floor({racingmenu::betting} / 2 + {racingmenu::bettotal} / {racingmenu::betcount3}) of {betbase} at loop-player
+
+                    play sound "entity.pillager.celebrate" with volume 1 and pitch 1 for loop-player
+                    play sound "block.chain.place" with volume 1.4 and pitch 1.1 for loop-player
+
+                else if {horsechoose::%loop-player's uuid%} is 1 or 2:
+                    message "&cYour horse has lost!" to loop-player
+                    play sound "entity.iron_golem.damage" with volume 1 and pitch 0.6 for loop-player
+
+            ResetHorsePos()
+
+
+
+        loop all players:
+            if current inventory of loop-player is {racingmenu::inventory}:
+                play sound "entity.horse.gallop" with volume 1 and pitch 1 for loop-player
+                ApplyHorsePos()
+                open {racingmenu::inventory} to loop-player
+
+    else:
+        if {racingmenu::ready} is true:
+            remove 1 from {racingmenu::countdown}
+
+            loop all players:
+                if current inventory of loop-player is {racingmenu::inventory}:
+                    ApplyHorsePos()
+                    open {racingmenu::inventory} to loop-player
+
+                if {racingmenu::countdown} <= 0:
+                    if {horsechoose::%loop-player's uuid%} is 1:
+                        add 1 to {racingmenu::betcount1}
+                    if {horsechoose::%loop-player's uuid%} is 2:
+                        add 1 to {racingmenu::betcount2}
+                    if {horsechoose::%loop-player's uuid%} is 3:
+                        add 1 to {racingmenu::betcount3}
+
+            if {racingmenu::countdown} <= 0:
+                set {racingmenu::start} to true
+                set {racingmenu::ready} to false
+                broadcast "&7&oBatting status [ %{racingmenu::betcount1}%, %{racingmenu::betcount2}%, %{racingmenu::betcount3}% ]"
+
+        else:
+            if {racingmenu::countdown} is not {@Waiting}:
+                set {racingmenu::countdown} to {@Waiting}
+
+
+
+command /hrSetBase:
+    trigger:
+        if player is op:
+            if player's tool is not 0 air:
+                set {betbase} to 1 of player's tool
+                message "&aBet Base is %{betbase}%"
+        else:
+            message "&c&oOP required"
+
+
+
+command /hr:
+    aliases: /rudak, /경마, /horseracing
+    trigger:
+        ApplyHorsePos()
+        open {racingmenu::inventory} to player
+
+
+
+command /hrSetMid [<integer>]:
+    trigger:
+        if player is op:
+            if arg 1 is not set:
+                message "&c&o/hrsetmid [integer]"
+                exit
+
+            set {newbetting} to arg 1
+            message "&a&oSet the middle of betting amount to %{newbetting}%"
+        else:
+            message "&c&oOP required"
+
+
+
+command /hrSetMax [<integer>]:
+    trigger:
+        if player is op:
+            if arg 1 is not set:
+                message "&c&o/hrsetmax [integer]"
+                exit
+
+            set {newrangemax} to arg 1
+            message "&a&oSet the max of betting amount to %{newrangemax}%"
+        else:
+            message "&c&oOP required"
+
+
+
+command /hrSetMin [<integer>]:
+    trigger:
+        if player is op:
+            if arg 1 is not set:
+                message "&c&o/hrsetmin [integer]"
+                exit
+
+            set {newrangemin} to arg 1
+            message "&a&oSet the min of betting amount to %{newrangemin}%"
+        else:
+            message "&c&oOP required"
